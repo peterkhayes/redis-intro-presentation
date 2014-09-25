@@ -9,28 +9,41 @@
 
 makeRedisQueue = (queueName, processor) ->
 
-  processNext = () ->
-    # To process an item, pop from the left side of the list.
-    redis.lpop queueName, (err, item) ->
-      # If the queue is empty or errors, wait 100ms before trying again.
-      if err? or not item
-        setTimeout(processNext, 100)
+  redisKey = ["queue", queueName].join(":") # "queue:listOfTasks"
 
-      # Otherwise, send the item to the processor, passing processNext
-      # as a callback, so we move on to the next item immediately.
-      processor(item, processNext)
-
-
-  return {
+  # Make the queue that we're going to return.
+  queue = {
     # The enqueue function pushes the item into the redis list.
     enqueue: (task, callback) ->
-      redis.rpush queueName, task, callback
+      redis.rpush redisKey, JSON.stringify(task), callback
 
     # The size function returns the length of the list.
     size: (callback) ->
-      redis.llen queueName, callback
+      redis.llen redisKey, callback
 
     # The clear function deletes the list at the given key.
     clear: (callback) ->
-      redis.del queueName, callback
+      redis.del redisKey, callback
   }
+
+  # Define a function that will take items out of the
+  # queue, one by one, and send them to the processor.
+  
+  # Let's assume that the processor is a function that takes
+  # two arguments - an item and a callback, does some action
+  # to the item, then calls the callback.
+  processNext = () ->
+    # To process an item, pop from the left side of the list.
+    redis.lpop redisKey, (err, item) ->
+      # If the queue is empty or errors, wait 1 second before trying again.
+      if err? or not item
+        setTimeout(processNext, 1000)
+
+      # Otherwise, send the item to the processor, passing processNext
+      # as a callback, so we move on to the next item immediately.
+      processor(JSON.parse(item), processNext)
+
+  # Begin processing.
+  processNext()
+  
+  return queue

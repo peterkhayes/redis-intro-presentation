@@ -10,21 +10,21 @@
 activeUsersMiddleware = (req, res, next) ->
 
   # Make a key representing the number of active users today.
-  date = new Date().toISOString()
-  dayString = date.slice(0, 10) # "YYYY-MM-DD"
-  dayKey = ["activeUsers", dayString].join(":")
+  date = new Date()
+  dayString = date.toISOString().slice(0, 10) # "YYYY-MM-DD"
+  dayKey = ["activeUsers", dayString].join(":") # "activeUsers:YYYY-MM-DD"
 
   # The id of the current user.
   userId = req.user.id
 
   # Also see: Hyperloglog!  Because aww yeah.
-  redis.sadd dayKey, userId, callback
+  redis.sadd dayKey, userId, next
 
 # To query daily active users (given a javascript date).
 getDailyActiveUsers = (date, callback) ->
 
   # Make the same key string
-  dayString = date.toISOString().slice(0, 10) # "YYYY-MM-DD"
+  dayString = date.toISOString().slice(0, 10)
   key = ["activeUsers", dayString].join(":")
 
   # `smembers` returns an array of set members
@@ -35,7 +35,7 @@ getWeeklyActiveUsers = (date, callback) ->
 
   # Get redis keys for each day this week.
   keys = [0..7].map (n) ->
-    today = new Date(date + i*86400000) # 86400000 is the number of ms in a day.
+    today = new Date(date + i*86400000) # 86,400,000 is the number of ms in a day.
     dayString = today.toISOString().slice(0, 10)
     return ["activeUsers", dayString].join(":")
 
