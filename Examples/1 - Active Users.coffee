@@ -2,9 +2,9 @@
 # Example 1 - Getting accurate daily and weekly active lists. #
 ###############################################################
 
-In this example, we're going to make an express middleware that keeps
-counts of our site's active users, by day.  We'll then write functions
-that query redis to get the active users by day and by week.
+# In this example, we're going to make an express middleware that keeps
+# counts of our site's active users, by day.  We'll then write functions
+# that query redis to get the active users by day and by week.
 
 # Code for Express middleware
 activeUsersMiddleware = (req, res, next) ->
