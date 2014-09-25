@@ -15,7 +15,7 @@ lastAccessUpdateMiddleware = (req, res, next) ->
   # Make a key that represents the last time we saved
   # the time of a user's most recent request.
   userId = req.user.id
-  redisKey = ["lastAccessUpdate", userId].join(":")
+  redisKey = ["lastAccessUpdate", userId].join(":") # "lastAccessUpdate:user1"
 
   redis.get redisKey, (err, result) ->
     if err?
