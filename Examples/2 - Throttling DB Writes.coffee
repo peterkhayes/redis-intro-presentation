@@ -32,5 +32,5 @@ lastAccessUpdateMiddleware = (req, res, next) ->
         return next(err)
 
       # And save a token indicating that we've updated last access
-      # to Redis, with a TTL of 1 hour (3600 seconds)
+      # to Redis, with an expiration of 1 hour (3600 seconds)
       redis.setex redisKey, 3600, true, next
